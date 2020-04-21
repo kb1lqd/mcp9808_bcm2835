@@ -38,7 +38,7 @@ int main (void)
 	bcm2835_i2c_set_baudrate(100000);
 
 	//MCP9808_BCM2835 Read Register Function
-	mcp9808_read_reg(5, rxbuf, 2);
+	mcp9808_read_reg(REG_DEVICE_ID, rxbuf, 2);
 	
 	//Display the resulting register read
 	for(i=0;i<BUF_SIZE;i++)
