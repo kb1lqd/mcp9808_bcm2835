@@ -2,6 +2,7 @@
  * using the BCM2835 library.
 */
 #include <stdio.h>
+#include <unistd.h>
 #include <bcm2835.h>
 #include "../mcp9808_bcm2835.h"
 
@@ -40,17 +41,15 @@ int main (void)
 	bcm2835_i2c_set_baudrate(100000);
 
 	float test;
-	test = mcp9808_get_temp();
 	
-	printf("TEMP 3 = Value: %0.2f\n", test);
-	
-	//Display the resulting register read
-	/*for(i=0;i<BUF_SIZE;i++)
+	while(1)
 	{
-		printf("RXBUF[%d] Value: %d\n", i, rxbuf[i]);
+		test = mcp9808_get_temp();
+		
+		printf("TEMP 3 = Value: %0.1f\n", test);
+		usleep(100000);
 	}
-	* */
-	
+
 	
 	bcm2835_i2c_end();
 	bcm2835_close();
