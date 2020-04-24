@@ -9,3 +9,4 @@
 #define REG_RESOLUTION 0X08
 
 int mcp9808_read_reg(int reg_addr, char* buf , int len);
+float mcp9808_get_temp();

@@ -91,4 +91,37 @@ int mcp9808_read_reg(int reg_addr, char* buf , int len)
 	
 }
 
+float mcp9808_get_temp()
+{
+	
+	char rxbuf[2]; //buffer for received values
+	
+	//MCP9808_BCM2835 Read Register Function
+	mcp9808_read_reg(REG_TEMP, rxbuf, 2);
+	
+	// Parse temp register values
+	int temp_sign = 0;
+	temp_sign = (0b00010000 & rxbuf[0]) >> 4;	
+	
+	unsigned char temp_ta_high;
+	unsigned char temp_ta_low;
+	int temperature_1 = 0;
+	float temperature_3 = 0.0;
+	
+	temp_ta_high = 0b00001111 && rxbuf[0];
+	temp_ta_low = rxbuf[1];
+	
+	if(temp_sign == 0){
+		temperature_1 = (temp_ta_high<<8) | temp_ta_low;
+		temperature_3 = (float) temperature_1/16;
+	}
+	else{
+		// Write negative temp conversion...
+	}
+	
+	
+	//printf("TEMP 1 = Value: %d\n", temperature_1);
+	//printf("TEMP 3 = Value: %0.2f\n", temperature_3);
 
+	return temperature_3;
+}
