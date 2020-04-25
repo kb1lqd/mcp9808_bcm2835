@@ -10,3 +10,4 @@
 
 int mcp9808_read_reg(int reg_addr, char* buf , int len);
 float mcp9808_get_temp( void );
+void print_bin(int inputnum, int bitlen );

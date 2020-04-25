@@ -11,6 +11,7 @@
 
 #define TESTMASK 0b00010000
 
+
 int main (void)
 {
 	
@@ -42,13 +43,17 @@ int main (void)
 
 	float test;
 	
-	while(1)
+	/*while(1)
 	{
 		test = mcp9808_get_temp();
 		
 		printf("TEMP 3 = Value: %0.1f\n", test);
 		usleep(100000);
-	}
+	}*/
+	
+	test = mcp9808_get_temp();
+	printf("TEMP 3 = Value: %0.1f\n", test);
+	
 
 	
 	bcm2835_i2c_end();
@@ -59,3 +64,6 @@ int main (void)
 
 		return 0;
 }
+
+
+

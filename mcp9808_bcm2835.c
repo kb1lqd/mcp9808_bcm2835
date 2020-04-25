@@ -31,6 +31,7 @@
 
 #include <bcm2835.h>
 #include "mcp9808_bcm2835.h"
+#include <stdio.h>
 
 
 
@@ -98,24 +99,44 @@ float mcp9808_get_temp( void )
 	int temp_sign = 0;
 	unsigned char temp_ta_high;
 	unsigned char temp_ta_low;
-	int temperature_1;
+	int temperature_1, test;
 	float temperature_3;
 	
 	//MCP9808_BCM2835 Read Register Function
 	mcp9808_read_reg(REG_TEMP, rxbuf, 2);
 	
 	// Parse temp register values
-	temp_sign = (0b00010000 & rxbuf[0]) >> 4;	
+	temp_sign = (0b00010000 & rxbuf[0]) >> 4;
 	temp_ta_high = 0b00001111 && rxbuf[0];
 	temp_ta_low = rxbuf[1];
 	
 	if(temp_sign == 0){
+		//Positive temp
 		temperature_1 = (temp_ta_high<<8) | temp_ta_low;
 		temperature_3 = (float) temperature_1/16;
 	}
 	else{
-		// Write negative temp conversion...
+		// Negative temp
+		temperature_1 = (temp_ta_high<<8) | temp_ta_low;
+		temperature_3 = (float) temperature_1/16;
+		temperature_3 = 256.0 - temperature_3;
 	}
 
 	return temperature_3;
+}
+
+void print_bin(int inputnum, int bitlen )
+{
+	int c, k;
+	//printf("%d\n", inputnum);
+	for (c=bitlen; c>=0; c--)
+	{
+		k=inputnum>>c;
+		
+		if(k&1)
+			printf("1");
+		else
+			printf("0");
+	}
+	printf("\n");
 }
