@@ -9,5 +9,6 @@
 #define REG_RESOLUTION 0X08
 
 int mcp9808_read_reg(int reg_addr, char* buf , int len);
+int mcp9808_write_reg(int reg_addr, char databyte);
 float mcp9808_get_temp( void );
 void print_bin(int inputnum, int bitlen );
