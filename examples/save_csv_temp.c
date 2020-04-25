@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <bcm2835.h>
+#include <signal.h>
 #include "../mcp9808_bcm2835.h"
 
 #define SLAVE_ADDRESS 24 //0x18
@@ -11,16 +12,42 @@
 
 #define TESTMASK 0b00010000
 
+void sigintHandler(int sig_num);
 
-int main (void)
+
+//Global Variables
+char infLoopFlag = 1;
+
+int main (int argc, char *argv[])
 {
 	
+		
 	//function variables
 	char current_reg = 0x05;
 	int clk_div = 2000;
-	
+	int intervaltime_s;	
 	int mcp9808_reason_code;
 	int i; //for loops
+	
+	//Parse arguments
+	// Interval duration seconds
+	if(argc<2)
+		{
+			printf("Incorrect argument count.\n");
+			printf("savecsv {interval (s)}\n");
+			return 1;
+		}
+	else
+	{
+		intervaltime_s = atoi(argv[1]);
+		if(intervaltime_s == 0)
+		{
+			intervaltime_s = 1;
+			printf("Incorrect time interval, default set to 1 second.\n");
+		}
+	}
+	
+	printf("%d time\n", intervaltime_s);
 	
 	
 	
@@ -44,8 +71,10 @@ int main (void)
 	bcm2835_i2c_set_baudrate(100000);
 
 	float test;
+	
+	signal(SIGINT, sigintHandler);
 
-	while(1)
+	while(infLoopFlag)
 	{
 		FILE *f = fopen("test.csv", "a");
 		test = mcp9808_get_temp();
@@ -64,6 +93,14 @@ int main (void)
 
 		return 0;
 }
+
+void sigintHandler(int sig_num)
+{
+	printf("CNTRL C Pressed.\n");
+	infLoopFlag = 0;
+	
+}
+
 
 
 
