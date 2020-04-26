@@ -5,6 +5,7 @@
 #include <unistd.h>
 #include <bcm2835.h>
 #include <signal.h>
+#include <time.h>
 #include "../mcp9808_bcm2835.h"
 
 #define SLAVE_ADDRESS 24 //0x18
@@ -33,6 +34,18 @@ int main (int argc, char *argv[])
 	int intervaltime_s;	
 	int mcp9808_reason_code;
 	int i; //for loops
+	time_t t;
+	struct tm *tmp;
+	char file_time[50];
+	char data_time[50];
+	
+	//Create file time
+	time(&t);
+	tmp = localtime( &t );
+	// using strftime to display time 
+    strftime(file_time, sizeof(file_time), "%Y%m%d-%H%M%S_templog.csv", tmp);   
+    printf("Formatted date & time : %s\n", file_time );
+    
 	
 	//Parse arguments
 	if(argc<2)
@@ -60,10 +73,17 @@ int main (int argc, char *argv[])
 
 	while(infLoopFlag)
 	{
-		FILE *f = fopen("test.csv", "w");
+		FILE *f = fopen(file_time, "a");
 		floatTempVal = mcp9808_get_temp();
 		printf("TEMP 3 = Value: %0.2f\n", floatTempVal);
-		fprintf(f, "%0.2f\n", floatTempVal);
+		
+		// Update data time log
+		time(&t);
+		tmp = localtime( &t );
+		strftime(data_time, sizeof(data_time), "%Y-%m-%d %H:%M:%S", tmp);   
+		printf("Formatted date & time : %s\n", data_time );
+		
+		fprintf(f, "%s,%0.2f\n", data_time, floatTempVal);
 		usleep(intervaltime_s*1000000);
 		fclose(f);
 
