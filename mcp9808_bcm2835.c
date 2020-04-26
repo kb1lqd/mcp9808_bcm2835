@@ -96,16 +96,12 @@ int mcp9808_write_reg(int reg_addr, char databyte)
 {
 	char tempwr[2] = {reg_addr, databyte};
 	int mcp9808_reason_code;
-	bcm2835_i2c_write(tempwr, 2);
-	//bcm2835_i2c_write(&databyte, 1);
-	
+	bcm2835_i2c_write(tempwr, 2);	
 	return 0;
-	
 }
 
 float mcp9808_get_temp( void )
 {
-	
 	char rxbuf[2]; //buffer for received values
 	int temp_sign = 0;
 	unsigned char temp_ta_high;

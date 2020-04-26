@@ -8,15 +8,20 @@
 #include "../mcp9808_bcm2835.h"
 
 #define SLAVE_ADDRESS 24 //0x18
+#define I2C_FREQ_HZ 100000 
 #define BUF_SIZE 4
 
 #define TESTMASK 0b00010000
 
-void sigintHandler(int sig_num);
+void sigintHandler( int sig_num );
+void i2csetup( char config );
+void disableI2c( void );
+void enableI2c( void );
 
 
 //Global Variables
 char infLoopFlag = 1;
+float floatTempVal;
 
 int main (int argc, char *argv[])
 {
@@ -30,7 +35,6 @@ int main (int argc, char *argv[])
 	int i; //for loops
 	
 	//Parse arguments
-	// Interval duration seconds
 	if(argc<2)
 		{
 			printf("Incorrect argument count.\n");
@@ -47,15 +51,53 @@ int main (int argc, char *argv[])
 		}
 	}
 	
-	printf("%d time\n", intervaltime_s);
+	// Enable I2C
+	i2csetup(1);
+	//initialize bcm2835 library
 	
+	// Create signal handler to allouw CNTL-C to quit loop
+	signal(SIGINT, sigintHandler);
+
+	while(infLoopFlag)
+	{
+		FILE *f = fopen("test.csv", "w");
+		floatTempVal = mcp9808_get_temp();
+		printf("TEMP 3 = Value: %0.2f\n", floatTempVal);
+		fprintf(f, "%0.2f\n", floatTempVal);
+		usleep(intervaltime_s*1000000);
+		fclose(f);
+
+	}
 	
-	
+	// Disable I2C
+	i2csetup(0);
+
+	return 0;
+}
+
+void i2csetup( char config )
+{
+	switch(config)
+	{
+		case 0: //disable I2C
+			disableI2c();
+			break;
+		case 1: //initialize I2C
+			enableI2c();
+			break;
+		default: //default
+			disableI2c();
+			break;
+			
+	}	
+}
+
+void enableI2c(void)
+{
 	//initialize bcm2835 library
 	if(!bcm2835_init())
 	{
 		printf("Failed to initialize.");
-		return 1;
 	}	
 
 	//initialize I2C pins for I2C operations (ALT mode)
@@ -69,34 +111,20 @@ int main (int argc, char *argv[])
 	
 	//set baudrate (standard is 100kbaud)
 	bcm2835_i2c_set_baudrate(100000);
-
-	float test;
 	
-	signal(SIGINT, sigintHandler);
+	printf("I2C Initialized with slave address %d at %dKHz.\n", 24, 100000/1000);
+}
 
-	while(infLoopFlag)
-	{
-		FILE *f = fopen("test.csv", "a");
-		test = mcp9808_get_temp();
-		printf("TEMP 3 = Value: %0.2f\n", test);
-		fprintf(f, "%0.2f\n", test);
-		usleep(100000);
-		fclose(f);
-
-	}
-	
+void disableI2c(void)
+{
 	bcm2835_i2c_end();
 	bcm2835_close();
-	
-	
-	
-
-		return 0;
+	printf("I2C Disabled.\n");
 }
 
 void sigintHandler(int sig_num)
 {
-	printf("CNTRL C Pressed.\n");
+	printf("CNTL-C Pressed.\n");
 	infLoopFlag = 0;
 	
 }
